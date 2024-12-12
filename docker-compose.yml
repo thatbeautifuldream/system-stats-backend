@@ -1,0 +1,15 @@
+services:
+  system-stats:
+    build: .
+    container_name: system-stats
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    # These privileged settings are necessary to access system stats
+    privileged: true
+    pid: "host" # Access to host processes
+    volumes:
+      - /proc:/host/proc:ro # Read-only access to proc
+      - /sys:/host/sys:ro # Read-only access to sys
+    restart: unless-stopped
