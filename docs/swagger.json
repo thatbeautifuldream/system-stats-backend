@@ -1,0 +1,118 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Information about a single system process",
+        "title": "System Stats API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:3000",
+    "basePath": "/api",
+    "paths": {
+        "/events": {
+            "get": {
+                "description": "Provides Server-Sent Events (SSE) stream of system statistics",
+                "produces": [
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "stats"
+                ],
+                "summary": "Get real-time system statistics",
+                "responses": {
+                    "200": {
+                        "description": "SSE stream of SystemStats",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/stats": {
+            "get": {
+                "description": "Returns current CPU, memory, disk usage, network traffic, and process information",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stats"
+                ],
+                "summary": "Get current system statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.SystemStats"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "main.ProcessInfo": {
+            "description": "Information about a single system process",
+            "type": "object",
+            "properties": {
+                "cpuPercent": {
+                    "type": "number",
+                    "example": 5.5
+                },
+                "memoryUsage": {
+                    "description": "in MB",
+                    "type": "number",
+                    "example": 256.5
+                },
+                "name": {
+                    "type": "string",
+                    "example": "chrome"
+                },
+                "pid": {
+                    "type": "integer",
+                    "example": 1234
+                }
+            }
+        },
+        "main.SystemStats": {
+            "description": "System resource usage statistics including CPU, memory, disk, network, and processes",
+            "type": "object",
+            "properties": {
+                "cpuUsage": {
+                    "type": "number",
+                    "example": 45.2
+                },
+                "diskUsage": {
+                    "type": "number",
+                    "example": 75
+                },
+                "memUsage": {
+                    "type": "number",
+                    "example": 60.5
+                },
+                "netTraffic": {
+                    "type": "integer",
+                    "example": 1048576
+                },
+                "processes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.ProcessInfo"
+                    }
+                }
+            }
+        }
+    }
+}

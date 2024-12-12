@@ -1,0 +1,83 @@
+basePath: /api
+definitions:
+  main.ProcessInfo:
+    description: Information about a single system process
+    properties:
+      cpuPercent:
+        example: 5.5
+        type: number
+      memoryUsage:
+        description: in MB
+        example: 256.5
+        type: number
+      name:
+        example: chrome
+        type: string
+      pid:
+        example: 1234
+        type: integer
+    type: object
+  main.SystemStats:
+    description: System resource usage statistics including CPU, memory, disk, network,
+      and processes
+    properties:
+      cpuUsage:
+        example: 45.2
+        type: number
+      diskUsage:
+        example: 75
+        type: number
+      memUsage:
+        example: 60.5
+        type: number
+      netTraffic:
+        example: 1048576
+        type: integer
+      processes:
+        items:
+          $ref: '#/definitions/main.ProcessInfo'
+        type: array
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: Information about a single system process
+  title: System Stats API
+  version: "1.0"
+paths:
+  /events:
+    get:
+      description: Provides Server-Sent Events (SSE) stream of system statistics
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: SSE stream of SystemStats
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get real-time system statistics
+      tags:
+      - stats
+  /stats:
+    get:
+      description: Returns current CPU, memory, disk usage, network traffic, and process
+        information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.SystemStats'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get current system statistics
+      tags:
+      - stats
+swagger: "2.0"

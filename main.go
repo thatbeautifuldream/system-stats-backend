@@ -16,7 +16,15 @@ import (
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/net"
 	"github.com/shirou/gopsutil/v3/process"
+	httpSwagger "github.com/swaggo/http-swagger"
+	_ "github.com/thatbeautifuldream/system-stats-backend/docs" // This line is needed for swagger
 )
+
+// @title System Stats API
+// @version 1.0
+// @description API for monitoring system resources and processes
+// @host localhost:3000
+// @BasePath /api
 
 // Constants
 const (
@@ -63,6 +71,14 @@ func NewServer(port string) *Server {
 
 // setupRoutes configures all the routes for the server
 func (s *Server) setupRoutes() {
+	// Swagger documentation endpoint
+	s.router.Handle("/swagger/", httpSwagger.Handler(
+		httpSwagger.URL("/swagger/doc.json"),
+		httpSwagger.DeepLinking(true),
+		httpSwagger.DocExpansion("none"),
+		httpSwagger.DomID("swagger-ui"),
+	))
+
 	// Root endpoint with helpful information
 	s.router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
