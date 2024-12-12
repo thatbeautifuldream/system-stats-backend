@@ -1,0 +1,26 @@
+# Air temporary files
+tmp/
+air_errors.log
+
+# Go binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go testing
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# IDE directories
+.idea/
+.vscode/
+
+# Environment variables
+.env
