@@ -30,6 +30,12 @@ import (
 const (
 	defaultPort = "3000"
 	apiPrefix   = "/api"
+	
+	// CORS headers
+	allowOrigin      = "*"
+	allowMethods     = "GET, POST, PUT, DELETE, OPTIONS"
+	allowHeaders     = "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization"
+	allowCredentials = "true"
 )
 
 // SystemStats represents system resource usage statistics
@@ -69,6 +75,25 @@ func NewServer(port string) *Server {
 	}
 }
 
+// corsMiddleware wraps an http.HandlerFunc and adds CORS headers
+func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Set CORS headers
+		w.Header().Set("Access-Control-Allow-Origin", allowOrigin)
+		w.Header().Set("Access-Control-Allow-Methods", allowMethods)
+		w.Header().Set("Access-Control-Allow-Headers", allowHeaders)
+		w.Header().Set("Access-Control-Allow-Credentials", allowCredentials)
+
+		// Handle preflight requests
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next(w, r)
+	}
+}
+
 // setupRoutes configures all the routes for the server
 func (s *Server) setupRoutes() {
 	// Swagger documentation endpoint
@@ -79,8 +104,8 @@ func (s *Server) setupRoutes() {
 		httpSwagger.DomID("swagger-ui"),
 	))
 
-	// Root endpoint with helpful information
-	s.router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	// Wrap root handler with CORS
+	s.router.HandleFunc("/", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			http.NotFound(w, r)
 			return
@@ -98,11 +123,11 @@ func (s *Server) setupRoutes() {
 		
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(info)
-	})
+	}))
 
-	// API endpoints
-	s.router.HandleFunc(apiPrefix+"/stats", s.statsHandler)
-	s.router.HandleFunc(apiPrefix+"/events", s.sseHandler)
+	// Wrap API endpoints with CORS
+	s.router.HandleFunc(apiPrefix+"/stats", corsMiddleware(s.statsHandler))
+	s.router.HandleFunc(apiPrefix+"/events", corsMiddleware(s.sseHandler))
 }
 
 // Start starts the server and handles graceful shutdown
@@ -251,7 +276,6 @@ func (s *Server) sseHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	// Create encoder for JSON
 	encoder := json.NewEncoder(w)
